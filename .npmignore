@@ -1,0 +1,17 @@
+.github
+credentials
+nodes
+tests
+node_modules
+*.ts
+!dist/**/*.d.ts
+tsconfig.json
+tsup.config.ts
+gulpfile.js
+.eslintrc.js
+.eslintrc.prepublish.js
+.prettierrc.js
+.editorconfig
+.gitignore
+*.tgz
+coverage
