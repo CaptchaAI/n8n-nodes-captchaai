@@ -14,13 +14,14 @@ import type {
 } from 'n8n-workflow';
 import { NodeConnectionTypes } from 'n8n-workflow';
 
+import { resolveCaptchaType } from './config/captchaTypes';
 import { nodeProperties } from './descriptions';
 import { runInBatches } from './libs/batch';
 import { toNodeError } from './libs/errors';
 import { toErrorItem, toOutputItem } from './libs/output';
 import { buildParams } from './libs/paramBuilder';
 import { closeClient, createClient, resolveApiKey } from './libs/sdk';
-import type { CaptchaTypeName, SolveSettings } from './libs/types';
+import type { SolveSettings } from './libs/types';
 
 const DEFAULT_MAX_POLL_SECONDS = 180;
 
@@ -141,7 +142,6 @@ export class CaptchaAi implements INodeType {
 			return [[]];
 		}
 
-		const captchaType = this.getNodeParameter('captchaType', 0) as CaptchaTypeName;
 		const executionMode = this.getNodeParameter('executionMode', 0, 'sequential') as string;
 		const rawSettings = this.getNodeParameter('settings', 0, {}) as Record<string, unknown>;
 
@@ -171,6 +171,12 @@ export class CaptchaAi implements INodeType {
 			// The SDK rejects a proxy type with no proxy, so send the pair or neither.
 			...(settings.proxy ? { proxy: settings.proxy, proxyType: settings.proxyType } : {}),
 		}).catch((error: unknown) => {
+			let captchaType = 'unknown';
+			try {
+				captchaType = resolveCaptchaType(this.getNodeParameter('captchaType', 0));
+			} catch {
+				// Client failed before type mattered; keep a neutral label in the error.
+			}
 			throw toNodeError(node, error, { itemIndex: 0, captchaType });
 		});
 
@@ -183,6 +189,10 @@ export class CaptchaAi implements INodeType {
 			await runInBatches(items.length, {
 				chunkSize,
 				solve: async (itemIndex) => {
+					const captchaType = resolveCaptchaType(
+						this.getNodeParameter('captchaType', itemIndex),
+					);
+
 					const params = buildParams(captchaType, {
 						read: (name, fallback) => this.getNodeParameter(name, itemIndex, fallback),
 						binaryPropertyNames: Object.keys(items[itemIndex]?.binary ?? {}),
@@ -194,6 +204,9 @@ export class CaptchaAi implements INodeType {
 					return await client.getResult(captchaType, taskId);
 				},
 				onSuccess: (itemIndex, result) => {
+					const captchaType = resolveCaptchaType(
+						this.getNodeParameter('captchaType', itemIndex),
+					);
 					output[itemIndex] = toOutputItem(result, {
 						captchaType,
 						itemIndex,
@@ -201,6 +214,13 @@ export class CaptchaAi implements INodeType {
 					});
 				},
 				onFailure: (itemIndex, error) => {
+					let captchaType = 'unknown';
+					try {
+						captchaType = resolveCaptchaType(this.getNodeParameter('captchaType', itemIndex));
+					} catch {
+						// Validation failed before a type was established.
+					}
+
 					if (this.continueOnFail()) {
 						output[itemIndex] = toErrorItem(error, {
 							captchaType,

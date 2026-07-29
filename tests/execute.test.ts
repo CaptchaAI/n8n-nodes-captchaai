@@ -310,4 +310,23 @@ describe('CaptchaAi.execute', () => {
 		expect(submit?.params.get('proxy')).toBe('user:pass@1.2.3.4:8080');
 		expect(submit?.params.get('proxytype')).toBe('SOCKS5');
 	});
+
+	it('reads CAPTCHA type per input item', async () => {
+		const { calls } = stubApi({
+			poll: () => ({ status: 1, request: '[1,2,3]' }),
+		});
+		await node.execute.call(
+			mockExecuteFunctions(2, {
+				captchaType: (itemIndex) => (itemIndex === 0 ? 'normal' : 'grid'),
+				image: (itemIndex) => imageFor(itemIndex),
+				instructions: 'Pick tiles',
+				gridSize: '3x3',
+			}),
+		);
+
+		const submits = calls.filter((call) => call.url.endsWith('in.php'));
+		expect(submits).toHaveLength(2);
+		expect(submits[0]?.params.get('method')).toBe('base64');
+		expect(submits[1]?.params.get('grid_size')).toBe('3x3');
+	});
 });

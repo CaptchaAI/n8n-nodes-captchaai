@@ -4,4 +4,5 @@ export {
 	captchaTypeOptions,
 	getCaptchaType,
 	requiresProxy,
+	resolveCaptchaType,
 } from './captchaTypes';

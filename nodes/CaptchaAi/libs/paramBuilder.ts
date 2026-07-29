@@ -198,7 +198,7 @@ export function buildParams(captchaType: CaptchaTypeName, context: BuildContext)
 	if (!builder) {
 		throw new InputValidationError(
 			`Unsupported CAPTCHA type "${captchaType}"`,
-			'Pick a type from the CAPTCHA Type dropdown.',
+			'Pick a type from the CAPTCHA Type field or pass a supported registry name from an expression.',
 		);
 	}
 

@@ -29,7 +29,7 @@ Restart n8n afterwards. The package ships with no runtime dependencies: the Capt
 
 ## Usage
 
-Add the **CaptchaAI** node, pick a **CAPTCHA Type**, and fill in the fields that appear for it. A typical login flow looks like this:
+Add the **CaptchaAI** node, pick a **CAPTCHA Type**, and fill in the fields that appear for it. You can switch **CAPTCHA Type** to expression mode and pass a registry name from upstream data, for example `{{ $json.captchaType }}` with values such as `recaptcha_v2` or `turnstile` (not the dropdown label). A typical login flow looks like this:
 
 1. **HTTP Request** fetches the target page.
 2. **HTML** extracts the site key.

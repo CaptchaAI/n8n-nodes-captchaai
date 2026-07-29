@@ -1,5 +1,6 @@
 import type { INodePropertyOptions } from 'n8n-workflow';
 
+import { InputValidationError } from '../libs/errors';
 import type { CaptchaTypeDef, CaptchaTypeName } from '../libs/types';
 
 /**
@@ -95,6 +96,32 @@ export const captchaTypeOptions: INodePropertyOptions[] = CAPTCHA_TYPES.map((typ
 
 export function getCaptchaType(value: string): CaptchaTypeDef | undefined {
 	return BY_VALUE.get(value);
+}
+
+/**
+ * Normalises a CAPTCHA Type parameter value from the UI or an expression.
+ *
+ * Expressions resolve to the registry name (recaptcha_v2, turnstile, …), not
+ * the human-readable label shown in the dropdown.
+ */
+export function resolveCaptchaType(value: unknown): CaptchaTypeName {
+	const raw = typeof value === 'string' ? value.trim() : '';
+
+	if (raw === '') {
+		throw new InputValidationError(
+			'CAPTCHA Type is required',
+			'Pick a type in the dropdown or set an expression that returns a supported registry name, for example {{ $json.captchaType }}.',
+		);
+	}
+
+	if (!BY_VALUE.has(raw)) {
+		throw new InputValidationError(
+			`Unsupported CAPTCHA type "${raw}"`,
+			'Use one of the CAPTCHA Type option values (recaptcha_v2, turnstile, normal, …). Labels such as "reCAPTCHA V2" are not accepted.',
+		);
+	}
+
+	return raw as CaptchaTypeName;
 }
 
 export function requiresProxy(value: string): boolean {

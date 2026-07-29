@@ -68,14 +68,16 @@ export function validateImageInput(
 		return { value };
 	}
 
-	if (looksLikePath(value)) {
-		return { problem: { kind: 'path', value } };
-	}
-
 	// Base64 payloads are often line-wrapped when pasted or read from a file.
+	// Check before path heuristics: JPEG data often begins with "/9j/" which
+	// would otherwise match looksLikePath's leading-slash rule.
 	const compact = value.replace(/\s+/g, '');
 	if (compact.length > 0 && compact.length % 4 === 0 && BASE64.test(compact)) {
 		return { value: compact };
+	}
+
+	if (looksLikePath(value)) {
+		return { problem: { kind: 'path', value } };
 	}
 
 	return { problem: { kind: 'unsupported', value } };

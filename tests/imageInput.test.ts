@@ -24,6 +24,12 @@ describe('validateImageInput', () => {
 		expect(validateImageInput('iVBORw0KGgo=').value).toBe('iVBORw0KGgo=');
 	});
 
+	it('accepts JPEG base64 that starts with /9j/ (not a file path)', () => {
+		const jpegB64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdC';
+		expect(validateImageInput(jpegB64).value).toBe(jpegB64);
+		expect(validateImageInput(jpegB64).problem).toBeUndefined();
+	});
+
 	it('strips whitespace out of a line-wrapped base64 string', () => {
 		expect(validateImageInput('iVBORw0K\n  Ggo=').value).toBe('iVBORw0KGgo=');
 	});

@@ -11,9 +11,9 @@ export const captchaTypeDescription: INodeProperties[] = [
 		displayName: 'CAPTCHA Type',
 		name: 'captchaType',
 		type: 'options',
-		noDataExpression: true,
 		options: captchaTypeOptions,
 		default: 'recaptcha_v2',
-		description: 'Which kind of CAPTCHA to solve',
+		description:
+			'Which kind of CAPTCHA to solve. Use an expression (for example {{ $json.captchaType }}) to take the registry name from a previous node. Supported values are the option values, such as recaptcha_v2 or turnstile.',
 	},
 ];
