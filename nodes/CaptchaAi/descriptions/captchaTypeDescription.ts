@@ -13,7 +13,6 @@ export const captchaTypeDescription: INodeProperties[] = [
 		type: 'options',
 		options: captchaTypeOptions,
 		default: 'recaptcha_v2',
-		description:
-			'Which kind of CAPTCHA to solve. Use an expression (for example {{ $json.captchaType }}) to take the registry name from a previous node. Supported values are the option values, such as recaptcha_v2 or turnstile.',
+		description: 'Which kind of CAPTCHA to solve. Use an expression (for example {{ $JSON.captchaType }}) to take the registry name from a previous node. Supported values are the option values, such as recaptcha_v2 or turnstile.',
 	},
 ];

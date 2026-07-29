@@ -317,8 +317,8 @@ describe('CaptchaAi.execute', () => {
 		});
 		await node.execute.call(
 			mockExecuteFunctions(2, {
-				captchaType: (itemIndex) => (itemIndex === 0 ? 'normal' : 'grid'),
-				image: (itemIndex) => imageFor(itemIndex),
+				captchaType: (itemIndex: number) => (itemIndex === 0 ? 'normal' : 'grid'),
+				image: (itemIndex: number) => imageFor(itemIndex),
 				instructions: 'Pick tiles',
 				gridSize: '3x3',
 			}),
