@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-captchaai",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Official CaptchaAI community node for n8n - solve reCAPTCHA, Turnstile, GeeTest, and many other CAPTCHA types inside your workflows.",
 	"keywords": [
 		"n8n-community-node-package",
