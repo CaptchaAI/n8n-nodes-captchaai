@@ -56,7 +56,7 @@ export const settingsDescription: INodeProperties[] = [
 				default: '',
 				placeholder: 'user:password@1.2.3.4:8080',
 				description:
-					'Proxy for CaptchaAI to solve through. Required for Cloudflare Challenge and CaptchaFox. Set Proxy Type as well',
+					'Proxy for CaptchaAI to solve through, for CAPTCHA types where a proxy is optional. Cloudflare Challenge and CaptchaFox require a proxy - use the dedicated Proxy field shown directly on the node for those instead of this one.',
 			},
 			{
 				displayName: 'Proxy Type',

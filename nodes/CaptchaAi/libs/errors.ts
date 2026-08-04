@@ -69,7 +69,7 @@ function describe(error: unknown, context: ErrorContext): { message: string; des
 	if (error instanceof ProxyError) {
 		return {
 			message: 'The proxy was rejected or could not be reached',
-			description: `${sdkMessage}. Check the Proxy and Proxy Type fields in this node's Settings. The proxy must be reachable from the n8n instance.`,
+			description: `${sdkMessage}. Check this node's Proxy and Proxy Type fields (shown directly on the node for CAPTCHA types that require one, or under Settings otherwise). The proxy must be reachable from the n8n instance.`,
 		};
 	}
 

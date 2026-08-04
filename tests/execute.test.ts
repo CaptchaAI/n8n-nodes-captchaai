@@ -311,6 +311,49 @@ describe('CaptchaAi.execute', () => {
 		expect(submit?.params.get('proxytype')).toBe('SOCKS5');
 	});
 
+	it(
+		'accepts the proxy pair from the top-level Proxy/Proxy Type fields (not just Settings)',
+		async () => {
+			const { calls } = stubApi();
+			await node.execute.call(
+				mockExecuteFunctions(1, {
+					captchaType: 'captchafox',
+					siteKey: 'fox-site-key',
+					pageUrl: 'https://example.com/challenge',
+					proxy: 'user:pass@1.2.3.4:8080',
+					proxyType: 'SOCKS5',
+				}),
+			);
+
+			const submit = calls.find((call) => call.url.endsWith('in.php'));
+			expect(submit?.params.get('proxy')).toBe('user:pass@1.2.3.4:8080');
+			expect(submit?.params.get('proxytype')).toBe('SOCKS5');
+		},
+		15000,
+	);
+
+	it(
+		'prefers the top-level Proxy fields over Settings when both are set',
+		async () => {
+			const { calls } = stubApi();
+			await node.execute.call(
+				mockExecuteFunctions(1, {
+					captchaType: 'captchafox',
+					siteKey: 'fox-site-key',
+					pageUrl: 'https://example.com/challenge',
+					proxy: 'top-level@1.2.3.4:8080',
+					proxyType: 'SOCKS5',
+					settings: { proxy: 'from-settings@5.6.7.8:9090', proxyType: 'HTTP' },
+				}),
+			);
+
+			const submit = calls.find((call) => call.url.endsWith('in.php'));
+			expect(submit?.params.get('proxy')).toBe('top-level@1.2.3.4:8080');
+			expect(submit?.params.get('proxytype')).toBe('SOCKS5');
+		},
+		15000,
+	);
+
 	it('reads CAPTCHA type per input item', async () => {
 		const { calls } = stubApi({
 			poll: () => ({ status: 1, request: '[1,2,3]' }),

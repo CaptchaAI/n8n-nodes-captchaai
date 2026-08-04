@@ -144,12 +144,18 @@ export class CaptchaAi implements INodeType {
 
 		const executionMode = this.getNodeParameter('executionMode', 0, 'sequential') as string;
 		const rawSettings = this.getNodeParameter('settings', 0, {}) as Record<string, unknown>;
+		// Shown directly on the node (not buried in Settings) for CAPTCHA types
+		// that require a proxy - see PROXY_REQUIRED_TYPES in fieldDescriptions.ts.
+		// Falls back to the Settings pair so existing workflows that configured
+		// an optional proxy there keep working unchanged.
+		const topLevelProxy = asNonEmptyString(this.getNodeParameter('proxy', 0, ''));
+		const topLevelProxyType = asNonEmptyString(this.getNodeParameter('proxyType', 0, ''));
 
 		const settings: SolveSettings = {
 			maxPollSeconds: asPositiveNumber(rawSettings.maxPollSeconds),
 			maxRetries: asPositiveNumber(rawSettings.maxRetries),
-			proxy: asNonEmptyString(rawSettings.proxy),
-			proxyType: asNonEmptyString(rawSettings.proxyType) as ProxyType | undefined,
+			proxy: topLevelProxy ?? asNonEmptyString(rawSettings.proxy),
+			proxyType: (topLevelProxyType ?? asNonEmptyString(rawSettings.proxyType)) as ProxyType | undefined,
 			includeRaw: rawSettings.includeRaw === true,
 		};
 

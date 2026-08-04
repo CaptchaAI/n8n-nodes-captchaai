@@ -42,12 +42,25 @@ const PAGE_URL_TYPES: CaptchaTypeName[] = [
 	'lemin',
 ];
 
+/**
+ * Types CaptchaAI's docs (docs.captchaai.com) state a proxy is mandatory for:
+ * Cloudflare Challenge ("you must provide a proxy") and CaptchaFox ("proxy
+ * settings are required for this task type"). Kept in sync with
+ * `requiresProxy()` in `config/captchaTypes.ts`, which is what
+ * `paramBuilder.ts` actually enforces at execution time - this list only
+ * controls where the Proxy fields are shown in the UI.
+ */
+const PROXY_REQUIRED_TYPES: CaptchaTypeName[] = ['cloudflare_challenge', 'captchafox'];
+
 function shownFor(...captchaType: CaptchaTypeName[]): IDisplayOptions {
 	return { show: { captchaType } };
 }
 
 /**
- * The nine BLS grid cells, all required, in reading order.
+ * The nine BLS grid cells, in reading order. Not marked `required: true`:
+ * see the note above `fieldDescriptions` for why - `buildParams()` /
+ * `PARAM_BUILDERS` in `libs/paramBuilder.ts` validates these at execution
+ * time instead.
  *
  * Descriptions are assembled with concatenation rather than template literals
  * because eslint-plugin-n8n-nodes-base's description autofixes rewrite
@@ -58,7 +71,6 @@ const blsImageFields: INodeProperties[] = Array.from({ length: 9 }, (_unused, in
 	name: 'blsImage' + String(index + 1),
 	type: 'string' as const,
 	default: '',
-	required: true,
 	placeholder: 'https://example.com/tile.png',
 	description:
 		'Image for grid cell ' +
@@ -67,6 +79,27 @@ const blsImageFields: INodeProperties[] = Array.from({ length: 9 }, (_unused, in
 	displayOptions: shownFor('bls'),
 }));
 
+/**
+ * `required: true` is deliberately omitted from every field below whose
+ * `displayOptions` is gated on `captchaType` (i.e. only relevant for some
+ * CAPTCHA types, not all). n8n can only resolve `displayOptions.show`
+ * against a *static* controlling value - when `captchaType` is set via an
+ * expression (typed with the fx toggle, or dragged in from an upstream
+ * node, e.g. the CaptchaAI Detect node's `type` output), n8n cannot know
+ * which branch will end up active, so its pre-flight "required parameter"
+ * check falls back to requiring every type's fields at once. That produced
+ * bogus "Image"/"Image 1"..."Image 9" (etc.) required errors even when the
+ * resolved type needed none of them, blocking execution entirely.
+ *
+ * Real validation for every one of these fields already happens at
+ * execution time in `libs/paramBuilder.ts` (`requiredText()`, `image()`),
+ * which checks the actual resolved value - including values coming from an
+ * expression - and throws a clear `InputValidationError` naming the exact
+ * field if it's missing. That happens before any request reaches CaptchaAI,
+ * so dropping the UI-level `required` flag does not weaken validation; it
+ * only moves the check from "before you click Execute" (which cannot see
+ * expression-resolved values anyway) to "when the node actually runs".
+ */
 export const fieldDescriptions: INodeProperties[] = [
 	// ----- Image types -------------------------------------------------------
 	{
@@ -74,7 +107,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'image',
 		type: 'string',
 		default: '',
-		required: true,
 		placeholder: 'https://example.com/captcha.png',
 		description:
 			'The CAPTCHA image to solve. Accepts an image URL, a data URI, or a base64 string. File paths and binary attachments are not supported. PNG and GIF images must be at most 1000px per side.',
@@ -86,7 +118,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'instructions',
 		type: 'string',
 		default: '',
-		required: true,
 		placeholder: 'Select all images with traffic lights',
 		description: 'What the solver should do with the image, in English',
 		displayOptions: shownFor('grid', 'bls'),
@@ -96,7 +127,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'gridSize',
 		type: 'options',
 		default: '3x3',
-		required: true,
 		options: [
 			{ name: '3x3', value: '3x3' },
 			{ name: '4x4', value: '4x4' },
@@ -111,7 +141,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'siteKey',
 		type: 'string',
 		default: '',
-		required: true,
 		placeholder: '6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-',
 		description: 'The CAPTCHA site key taken from the target page HTML',
 		displayOptions: { show: { captchaType: SITE_KEY_TYPES } },
@@ -121,10 +150,38 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'pageUrl',
 		type: 'string',
 		default: '',
-		required: true,
 		placeholder: 'https://example.com/login',
 		description: 'Full URL of the page the CAPTCHA appears on',
 		displayOptions: { show: { captchaType: PAGE_URL_TYPES } },
+	},
+
+	// ----- Proxy (required for this CAPTCHA type - see PROXY_REQUIRED_TYPES) --
+	// Shown directly on the node instead of buried inside the collapsed
+	// Settings section, since CaptchaAI's docs mark it mandatory for these
+	// types. Settings still has its own Proxy/Proxy Type pair for optional use
+	// with other CAPTCHA types (execute() prefers this pair when both are set).
+	{
+		displayName: 'Proxy',
+		name: 'proxy',
+		type: 'string',
+		default: '',
+		placeholder: 'user:password@1.2.3.4:8080',
+		description: 'Proxy for CaptchaAI to solve through. Required for this CAPTCHA type - set Proxy Type below as well.',
+		displayOptions: { show: { captchaType: PROXY_REQUIRED_TYPES } },
+	},
+	{
+		displayName: 'Proxy Type',
+		name: 'proxyType',
+		type: 'options',
+		default: 'HTTP',
+		options: [
+			{ name: 'HTTP', value: 'HTTP' },
+			{ name: 'HTTPS', value: 'HTTPS' },
+			{ name: 'SOCKS4', value: 'SOCKS4' },
+			{ name: 'SOCKS5', value: 'SOCKS5' },
+		],
+		description: 'Protocol of the proxy above',
+		displayOptions: { show: { captchaType: PROXY_REQUIRED_TYPES } },
 	},
 
 	// ----- GeeTest -----------------------------------------------------------
@@ -133,7 +190,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'gt',
 		type: 'string',
 		default: '',
-		required: true,
 		description: 'The GeeTest "gt" value from the target page',
 		displayOptions: shownFor('geetest'),
 	},
@@ -142,7 +198,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'challenge',
 		type: 'string',
 		default: '',
-		required: true,
 		description: 'The GeeTest "challenge" value. It is single use, so fetch a fresh one for every solve.',
 		displayOptions: shownFor('geetest'),
 	},
@@ -153,7 +208,6 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'captchaId',
 		type: 'string',
 		default: '',
-		required: true,
 		description: 'The Lemin captcha ID from the target page',
 		displayOptions: shownFor('lemin'),
 	},
@@ -162,18 +216,16 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'divId',
 		type: 'string',
 		default: '',
-		required: true,
 		description: 'ID of the HTML element the Lemin widget is rendered into',
 		displayOptions: shownFor('lemin'),
 	},
 
-	// ----- reCAPTCHA v3 action (required) ------------------------------------
+	// ----- reCAPTCHA v3 action (required at execution time, see note above) ---
 	{
 		displayName: 'Action',
 		name: 'action',
 		type: 'string',
 		default: '',
-		required: true,
 		placeholder: 'login',
 		description: 'The reCAPTCHA v3 action name used by the page, for example "login"',
 		displayOptions: { show: { captchaType: RECAPTCHA_V3_TYPES } },

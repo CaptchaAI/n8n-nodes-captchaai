@@ -207,7 +207,7 @@ export function buildParams(captchaType: CaptchaTypeName, context: BuildContext)
 		if (!proxy || !proxyType) {
 			throw new InputValidationError(
 				`The "${captchaType}" CAPTCHA type requires a proxy`,
-				'Open Settings on this node and fill in both Proxy and Proxy Type. CaptchaAI cannot solve this type without one.',
+				'Fill in both Proxy and Proxy Type on this node. CaptchaAI cannot solve this type without one.',
 			);
 		}
 	}
