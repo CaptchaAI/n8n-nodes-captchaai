@@ -1,6 +1,6 @@
 # n8n-nodes-captchaai
 
-An [n8n](https://n8n.io/) community node for [CaptchaAI](https://captchaai.com/). Solve reCAPTCHA, Cloudflare Turnstile, GeeTest, image CAPTCHAs and more from inside a workflow.
+An [n8n](https://n8n.io/) community node for [CaptchaAI](https://captchaai.com/). Solve reCAPTCHA, Cloudflare Turnstile, GeeTest v3, image CAPTCHAs and more from inside a workflow.
 
 [Installation](#installation) · [Credentials](#credentials) · [Usage](#usage) · [Supported CAPTCHA types](#supported-captcha-types) · [Settings](#settings) · [Output](#output) · [Errors](#errors) · [Development](#development)
 
@@ -72,14 +72,14 @@ A failure inside a batch is isolated: its siblings still finish, and the output 
 | reCAPTCHA V3 Enterprise | Site Key, Page URL, Action | Min Score, Cookies, User Agent |
 | Cloudflare Turnstile | Site Key, Page URL | Cookies, User Agent |
 | Cloudflare Challenge | Page URL, plus a proxy | Cookies, User Agent |
-| GeeTest | GT, Challenge, Page URL | Cookies, User Agent |
-| CaptchaFox | Site Key, Page URL, plus a proxy | Cookies, User Agent |
-| Friendly Captcha | Site Key, Page URL | Version |
-| Lemin | Captcha ID, Div ID, Page URL | API Server |
+| GeeTest v3 | GT, Challenge, Page URL | Cookies, User Agent |
+| CaptchaFox (beta) | Site Key, Page URL, plus a proxy | Cookies, User Agent |
+| Friendly Captcha (beta) | Site Key, Page URL | Version |
+| Lemin (beta) | Captcha ID, Div ID, Page URL | API Server |
 
 Cloudflare Challenge and CaptchaFox cannot be solved without a proxy. Set **Proxy** and **Proxy Type** in Settings, otherwise the node fails the item before contacting the API.
 
-The GeeTest challenge value is single use. Fetch a fresh one immediately before solving.
+The GeeTest v3 challenge value is single use. Fetch a fresh one immediately before solving.
 
 ## Settings
 
@@ -106,7 +106,7 @@ One output item per input item:
 }
 ```
 
-`solution` keeps whatever shape the CAPTCHA type produces: a token string for reCAPTCHA and Turnstile, an object for GeeTest and Lemin, an array of tile indices for Grid and BLS.
+`solution` keeps whatever shape the CAPTCHA type produces: a token string for reCAPTCHA and Turnstile, an object for GeeTest v3 and Lemin, an array of tile indices for Grid and BLS.
 
 `userAgent` is present only for the types that return one, namely reCAPTCHA Enterprise, Cloudflare Challenge, and CaptchaFox. When it is there, reuse it on the follow-up request or the token is likely to be rejected.
 
