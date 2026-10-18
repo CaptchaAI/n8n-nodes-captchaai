@@ -65,7 +65,7 @@ export const CAPTCHA_TYPES: CaptchaTypeDef[] = [
 	},
 	{
 		value: 'geetest',
-		name: 'GeeTest',
+		name: 'GeeTest V3',
 		description: 'GeeTest v3 slider. Returns challenge, validate, and seccode.',
 	},
 	{

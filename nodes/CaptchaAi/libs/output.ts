@@ -13,7 +13,7 @@ export interface OutputOptions {
  * Shapes one solved CAPTCHA into an output item.
  *
  * The solution keeps whatever shape the CAPTCHA type produces: a token string
- * for reCAPTCHA and Turnstile, an object for GeeTest and Lemin, an array of
+ * for reCAPTCHA and Turnstile, an object for GeeTest v3 and Lemin, an array of
  * grid indices for Grid and BLS. Flattening it would lose information that
  * downstream nodes need.
  */
