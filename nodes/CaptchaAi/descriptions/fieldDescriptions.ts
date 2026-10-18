@@ -184,13 +184,13 @@ export const fieldDescriptions: INodeProperties[] = [
 		displayOptions: { show: { captchaType: PROXY_REQUIRED_TYPES } },
 	},
 
-	// ----- GeeTest -----------------------------------------------------------
+	// ----- GeeTest v3 --------------------------------------------------------
 	{
 		displayName: 'GT',
 		name: 'gt',
 		type: 'string',
 		default: '',
-		description: 'The GeeTest "gt" value from the target page',
+		description: 'The GeeTest v3 "gt" value from the target page',
 		displayOptions: shownFor('geetest'),
 	},
 	{
@@ -198,7 +198,7 @@ export const fieldDescriptions: INodeProperties[] = [
 		name: 'challenge',
 		type: 'string',
 		default: '',
-		description: 'The GeeTest "challenge" value. It is single use, so fetch a fresh one for every solve.',
+		description: 'The GeeTest v3 "challenge" value. It is single use, so fetch a fresh one for every solve.',
 		displayOptions: shownFor('geetest'),
 	},
 

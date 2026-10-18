@@ -15,6 +15,12 @@ All notable changes to this project are documented here. The format follows
 - A short notice at the top of the Settings section explaining what the section
   is for.
 
+### Changed
+
+- The CAPTCHA Type dropdown shows GeeTest V3 instead of GeeTest, and the GT
+  and Challenge field help says GeeTest v3, the only GeeTest version
+  CaptchaAI solves.
+
 ### Fixed
 
 - The API key is now trimmed before it reaches the API. A key pasted with a
